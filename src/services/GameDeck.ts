@@ -8,10 +8,6 @@ export class GameDeck implements Deck {
     this.createDeck();
   }
 
-  clearDeck(): void {
-    this.cards = [];
-  }
-
   createDeck(): void {
     const suits: Suit[] = ['♠️', '❤️', '♣️', '♦️'];
     const possibleValues: (number | string)[]= [
@@ -42,7 +38,11 @@ export class GameDeck implements Deck {
     return theCard;
   }
 
-  removeCardFromDeck(id: number): void {
+  private clearDeck(): void {
+    this.cards = [];
+  }
+
+  private removeCardFromDeck(id: number): void {
     this.cards.splice(id, 1);
   }
 }

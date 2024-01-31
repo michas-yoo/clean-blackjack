@@ -1,44 +1,59 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { GameDeck } from '../../services/GameDeck.ts';
-import { GameHand } from '../../services/GameHand.ts';
 import { GameService } from '../../services/GameService.ts';
-import { dealersPlay } from '../../application/dealersPlay.ts';
+import { MainPlayer } from '../../services/MainPlayer.ts';
+import { GameDealer } from '../../services/GameDealer.ts';
 
 const deck = ref(new GameDeck());
-const playersHand = ref(new GameHand());
-const dealersHand = ref(new GameHand());
-const game = ref(new GameService(deck.value, dealersHand.value, playersHand.value));
+const player = ref(new MainPlayer(deck.value));
+const dealer = ref(new GameDealer(deck.value));
+const game = ref(new GameService(deck.value, player.value, dealer.value));
 </script>
 
 <template>
   <article class="field">
     <div class="hand dealer">
-      <div v-for="(card, i) in dealersHand.cards" :key="i" class="card">
+      <div v-for="(card, i) in dealer.cards" :key="i" class="card">
         {{ card.suit }}{{ card.value }}
       </div>
     </div>
     <div class="score">
-      Счёт: {{ game.playerScore }} : {{ game.dealerScore }}
+      Счёт: {{ game.playerWins }} : {{ game.dealerWins }}
       <br>
-      <p>У дилера: {{ dealersHand.score }}</p>
+      <p>У дилера: {{ dealer.score }}</p>
     </div>
     <div class="deck-container">
       <div class="deck">{{ deck.cards.length }}</div>
     </div>
     <div class="hand">
-      <div v-for="(card, i) in playersHand.cards" :key="i" class="card">
+      <div v-for="(card, i) in player.cards" :key="i" class="card">
         {{ card.suit }}{{ card.value }}
       </div>
     </div>
     <div class="currentScore">
-      {{ playersHand.score }}
+      {{ player.score }}
     </div>
     <div class="controls">
-      <button v-if="game.state === 'game'" @click="game.playerMove()">More</button>
-      <button v-if="game.state === 'game'" @click="dealersPlay(game)">Pass</button>
+      <button
+        v-if="game.state === 'game'"
+        @click="game.playerMove()"
+      >
+        More
+      </button>
+      <button
+        v-if="game.state === 'game'"
+        @click="game.startDealerMoves()"
+      >
+        Pass
+      </button>
 
-      <button v-if="game.state === 'pending'" @click="game.setupHands()">Restart</button>
+      <button
+        v-if="game.state === 'pending'"
+        @click="game.setupHands()"
+      >
+        Restart
+      </button>
     </div>
   </article>
 </template>

@@ -3,13 +3,11 @@ export type GameState = 'game' | 'pending';
 
 export interface Game {
   state: GameState;
-  playerScore: number;
-  dealerScore: number;
+  playerWins: number;
+  dealerWins: number;
   setupHands(): void;
   playerMove(): void;
-  dealerMove(): void;
-  canDealerMove(): boolean;
-  processWinner(): void;
-  getWinner(): string;
-  addWin(winner: Winner): void;
+  startDealerMoves(): void;
 }
+
+export const MAX_SCORE = 21;

@@ -1,21 +1,20 @@
 import { Deck } from '../domain/deck.ts';
-import { Hand } from '../domain/hand.ts';
-import { Game, GameState, Winner } from '../domain/game.ts';
-import { Card } from '../domain/card.ts';
+import { Game, GameState, MAX_SCORE, Winner } from '../domain/game.ts';
+import { Dealer, Player } from '../domain/player.ts';
 
 export class GameService implements Game {
   public state: GameState;
-  public playerScore: number = 0;
-  public dealerScore: number = 0;
+  private player: Player;
+  private dealer: Dealer;
+  public playerWins: number = 0;
+  public dealerWins: number = 0;
   private readonly deck: Deck;
-  private readonly playersHand: Hand;
-  private readonly dealersHand: Hand;
 
-  constructor(deck: Deck, dealersHand: Hand, playersHand: Hand) {
+  constructor(deck: Deck, player: Player, dealer: Dealer) {
     this.deck = deck;
-    this.dealersHand = dealersHand;
-    this.playersHand = playersHand;
     this.state = 'game';
+    this.player = player;
+    this.dealer = dealer;
 
     this.setupHands();
   }
@@ -26,77 +25,54 @@ export class GameService implements Game {
       this.deck.reCreateDeck();
     }
 
-    this.dealersHand.resetHand();
-    this.playersHand.resetHand();
-
-    this.dealersHand.addCard(this.deck.pickCard());
-
-    this.playersHand.addCard(this.deck.pickCard());
-    this.playersHand.addCard(this.deck.pickCard());
+    this.player.dealCards();
+    this.dealer.dealCards();
   }
 
   playerMove(): void {
-    const card: Card = this.deck.pickCard();
-    this.playersHand.addCard(card);
+    this.player.makeAMove();
 
-    if (this.playersHand.score > 21) {
+    if (!this.player.checkIfCanMove()) {
       setTimeout(() => {
-        alert('Too much!');
+        alert('Can\'t move!');
         this.processWinner();
-      }, 1000);
-    }
-  }
-
-  canDealerMove(): boolean {
-    return this.dealersHand.score < 16
-      || (
-        this.playersHand.score <= 21
-        && this.dealersHand.score < this.playersHand.score
-        && this.dealersHand.score < 16
-      );
-  }
-
-  dealerMove(): void {
-    if (!this.canDealerMove()) {
-      alert('Dealer cant move!');
-      this.processWinner();
+      }, 500);
       return;
     }
-
-    const card: Card = this.deck.pickCard();
-    this.dealersHand.addCard(card);
   }
 
-  getWinner(): string {
-    const playersHandScore: number = this.playersHand.score;
-    const dealersHandScore: number = this.dealersHand.score;
-
-    if (
-      (playersHandScore > 21 && dealersHandScore <= 21)
-      || (playersHandScore < 21 && dealersHandScore > playersHandScore && dealersHandScore <= 21)
-    ) {
-      return 'dealer';
-    }
-
-    if (
-      (dealersHandScore > 21 && playersHandScore <= 21)
-      || (dealersHandScore < 21 && playersHandScore > dealersHandScore && dealersHandScore <= 21)) {
-      return 'player';
-    }
-
-    return 'draw!';
-  }
-
-  processWinner(): void {
-    const winner: string = this.getWinner();
-    if (winner !== 'draw') {
-      this.addWin(winner as Winner);
-    }
-  }
-
-  addWin(winner: Winner): void {
+  startDealerMoves(): void {
     this.state = 'pending';
-    this[`${winner}Score`] += 1;
+
+    const gameInterval = setInterval(() => {
+      if (!this.dealer.checkIfCanMove(this.player.score)) {
+        clearInterval(gameInterval);
+        alert('Dealer cant move!');
+        this.processWinner();
+        return
+      }
+
+      this.dealer.makeAMove();
+    }, 1000)
+  }
+
+  private determineWinner(playerScore: number, dealerScore: number): Winner {
+    if (playerScore > MAX_SCORE) return 'dealer';
+    if (dealerScore > MAX_SCORE) return 'player';
+    if (playerScore > dealerScore) return 'player';
+
+    // dealer wins on a draw
+    return 'dealer';
+  }
+
+  private processWinner(): void {
+    this.state = 'pending';
+    const winner: Winner = this.determineWinner(this.player.score, this.dealer.score);
+    this.addWin(winner);
+  }
+
+  private addWin(winner: Winner): void {
+    this[`${winner}Wins`] += 1;
     alert(`${winner} won!`);
   }
 }

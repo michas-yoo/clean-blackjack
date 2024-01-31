@@ -58,48 +58,20 @@ const game = ref(new GameService(deck.value, player.value, dealer.value));
   </article>
 </template>
 
-<style scoped>
-* {
-  box-sizing: border-box;
-}
-
+<style scoped lang="scss">
 .field {
+  width: 800px;
+  height: 350px;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 50px 1fr;
-  grid-gap: 10px;
+  grid-gap: 50px 10px;
   padding: 20px;
   background: darkgreen;
 }
 
 .dealer {
   grid-column-start: 2;
-}
-
-.card {
-  background: white;
-  color: black;
-}
-
-.card:not(:first-of-type) {
-  margin-left: -20px;
-}
-
-.deck-container {
-  grid-column: span 3;
-}
-
-.deck {
-  width: 30%;
-  height: 100%;
-  background: darkred;
-  color: white;
-  display: grid;
-  place-items: center;
-}
-
-.hand {
-  display: flex;
 }
 
 .card, .currentScore, .deck {
@@ -110,6 +82,46 @@ const game = ref(new GameService(deck.value, player.value, dealer.value));
 .card, .currentScore, .controls {
   display: grid;
   place-items: center;
+}
+
+.card {
+  padding: 10px 15px;
+  background: white;
+  color: black;
+
+  &:not(:first-of-type) {
+    margin-left: -5px;
+  }
+}
+
+.deck-container {
+  grid-column: span 3;
+}
+
+.deck {
+  position: relative;
+  width: 120px;
+  height: 100%;
+  background: darkred;
+  color: white;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    width: 100%;
+    height: 95%;
+    background: darkred;
+    border: 2px solid black;
+    z-index: -1;
+  }
+}
+
+.hand {
+  display: flex;
 }
 
 .controls {

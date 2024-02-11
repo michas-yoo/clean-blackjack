@@ -1,6 +1,7 @@
 import { Deck } from '../domain/deck.ts';
 import { Hand } from '../domain/hand.ts';
 import { AI, Player } from '../domain/player.ts';
+import { ModalService } from './ModalService.ts';
 import { Game, GameState, MAX_SCORE } from '../domain/game.ts';
 
 export class GameService implements Game {
@@ -9,7 +10,6 @@ export class GameService implements Game {
   private readonly player: Player;
   private readonly dealer: AI;
   private readonly enemies: AI[];
-
   private readonly deck: Deck;
 
   constructor(deck: Deck, player: Player, dealer: AI, enemies: AI[]) {
@@ -38,7 +38,7 @@ export class GameService implements Game {
 
   playerMove(): void {
     if (!this.checkIfEnoughCards()) {
-      alert('Колода закончилась, никто не победил!');
+      ModalService.alert('Колода закончилась, никто не победил!');
       this.setupHands();
       return;
     }
@@ -47,7 +47,7 @@ export class GameService implements Game {
 
     if (!this.player.checkIfCanMove()) {
       setTimeout(() => {
-        alert('Перебор!');
+        ModalService.alert('Перебор!');
 
         if (this.enemies.length) {
           this.startEnemiesMoves();
@@ -63,13 +63,13 @@ export class GameService implements Game {
     this.state = 'pending';
 
     if (!this.checkIfEnoughCards()) {
-      alert('Колода закончилась, никто не победил!');
+      ModalService.alert('Колода закончилась, никто не победил!');
       this.setupHands();
       return;
     }
 
     if (!this.enemies.length) {
-      alert('Ход дилера');
+      ModalService.alert('Ход дилера');
       this.startDealerMoves();
       return;
     }
@@ -81,7 +81,7 @@ export class GameService implements Game {
 
       if (!enemy) {
         clearInterval(enemyMovingInterval);
-        alert('Все противники сделали ход.');
+        ModalService.alert('Все противники сделали ход.');
         this.startDealerMoves();
         return;
       }
@@ -91,14 +91,14 @@ export class GameService implements Game {
         return;
       }
 
-      alert(`${enemy.name} больше не ходит`);
+      ModalService.alert(`${enemy.name} больше не ходит`);
       currentEnemy++;
     }, 1000);
   }
 
   startDealerMoves(): void {
     if (!this.checkIfEnoughCards()) {
-      alert('Колода закончилась, никто не победил!');
+      ModalService.alert('Колода закончилась, никто не победил!');
       this.setupHands();
       return;
     }
@@ -106,7 +106,7 @@ export class GameService implements Game {
     const gameInterval = setInterval(() => {
       if (!this.dealer.checkIfCanMove(this.player.score)) {
         clearInterval(gameInterval);
-        alert('Дилер больше не ходит!');
+        ModalService.alert('Дилер больше не ходит!');
         this.processWinner();
         return;
       }
@@ -140,7 +140,7 @@ export class GameService implements Game {
     });
 
     if (!currentWinner) {
-      alert("Нет победителей, выиграл дилер");
+      ModalService.alert("Нет победителей, выиграл дилер");
       return this.dealer;
     }
 
@@ -155,7 +155,7 @@ export class GameService implements Game {
   }
 
   private addWin(winner: Hand): void {
-    alert(`${winner.name} победил!`);
+    ModalService.alert(`${winner.name} победил!`);
     winner.wins++;
   }
 }

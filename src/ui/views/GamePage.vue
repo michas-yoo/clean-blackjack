@@ -6,6 +6,8 @@ import { MainPlayer } from '../../services/MainPlayer.ts';
 import { GameDealer } from '../../services/GameDealer.ts';
 import { AI } from '../../domain/player.ts';
 import { AIPlayer } from '../../services/AIPlayer.ts';
+import TheHand from '../components/TheHand.vue';
+import TheScoreBoard from '../components/TheScoreBoard.vue';
 
 const aiPlayersAmount = prompt('Сколько будет соперников?', '0');
 
@@ -25,61 +27,47 @@ const game = ref(new GameService(deck.value, player.value, dealer.value, enemies
   <article class="field">
     <div class="dealer">
       <p>У дилера в руке: {{ dealer.score }}</p>
-      <div class="hand">
-        <div v-for="(card, i) in dealer.cards" :key="i" class="card">
-          {{ card.suit }}{{ card.value }}
-        </div>
-      </div>
+      <TheHand :cards="dealer.cards" />
     </div>
-    <div class="score">
-      Счёт:
-      <div>
-        <p>Игрок: {{ player.wins }}</p>
-        <p>Дилер: {{ dealer.wins }}</p>
-        <p v-for="enemy in enemies">{{ enemy.name }}: {{ enemy.wins }}</p>
-      </div>
-    </div>
+
+    <TheScoreBoard
+      :dealer="dealer"
+      :enemies="enemies"
+      :player="player"
+    />
+
     <div class="deck-container">
       <div class="deck">{{ deck.cards.length }}</div>
     </div>
+
     <div class="enemies-container">
       <div v-for="(enemy, i) in enemies" :key="i">
         {{ enemy.name }}
         <span v-if="enemy.cards.length">В руке: {{ enemy.score }}</span>
-        <div class="hand">
-          <div v-for="(card, j) in enemy.cards" :key="j" class="card">
-            {{ card.suit }}{{ card.value }}
-          </div>
-        </div>
+        <TheHand :cards="enemy.cards" />
       </div>
     </div>
-    <div class="hand">
-      <div v-for="(card, i) in player.cards" :key="i" class="card">
-        {{ card.suit }}{{ card.value }}
-      </div>
-    </div>
+
+    <TheHand :cards="player.cards" />
+
     <div class="currentScore">
       {{ player.score }}
     </div>
+
     <div class="controls">
-      <button
-        v-if="game.state === 'game'"
-        @click="game.playerMove()"
-      >
-        More
+      <button v-if="game.state === 'game'" @click="game.playerMove()">
+        Ещё
       </button>
-      <button
-        v-if="game.state === 'game'"
-        @click="game.startEnemiesMoves()"
-      >
-        Pass
+      <button v-if="game.state === 'game'" @click="game.startEnemiesMoves()">
+        Пас
       </button>
 
       <button
         v-if="game.state === 'pending'"
         @click="game.setupHands()"
+        :disabled="!game.canRestart"
       >
-        Restart
+        Заново
       </button>
     </div>
   </article>
@@ -100,24 +88,14 @@ const game = ref(new GameService(deck.value, player.value, dealer.value, enemies
   grid-column-start: 2;
 }
 
-.card, .currentScore, .deck {
+.currentScore, .deck {
   border-radius: 5px;
   border: 2px solid black;
 }
 
-.card, .currentScore, .controls {
+.currentScore, .controls {
   display: grid;
   place-items: center;
-}
-
-.card {
-  padding: 10px 15px;
-  background: white;
-  color: black;
-
-  &:not(:first-of-type) {
-    margin-left: -5px;
-  }
 }
 
 .deck-container {
@@ -148,29 +126,11 @@ const game = ref(new GameService(deck.value, player.value, dealer.value, enemies
   }
 }
 
-.hand {
-  display: flex;
-}
-
 .dealer {
   flex-direction: column;
 }
 
 .controls {
   grid-gap: 10px;
-}
-
-.score {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.score div {
-  display: flex;
-  flex-direction: column;
-}
-
-.score p {
-  margin: 0;
 }
 </style>

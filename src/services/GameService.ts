@@ -5,6 +5,7 @@ import { Game, GameState, MAX_SCORE } from '../domain/game.ts';
 
 export class GameService implements Game {
   public state: GameState;
+  public canRestart: boolean;
   private readonly player: Player;
   private readonly dealer: AI;
   private readonly enemies: AI[];
@@ -17,12 +18,15 @@ export class GameService implements Game {
     this.player = player;
     this.dealer = dealer;
     this.enemies = enemies;
+    this.canRestart = false;
 
     this.setupHands();
   }
 
   setupHands(): void {
     this.state = 'game';
+    this.canRestart = false;
+
     if (this.deck.cards.length <= 4) {
       this.deck.reCreateDeck();
     }
@@ -33,6 +37,12 @@ export class GameService implements Game {
   }
 
   playerMove(): void {
+    if (!this.checkIfEnoughCards()) {
+      alert('Колода закончилась, никто не победил!');
+      this.setupHands();
+      return;
+    }
+
     this.player.makeAMove();
 
     if (!this.player.checkIfCanMove()) {
@@ -51,6 +61,12 @@ export class GameService implements Game {
 
   startEnemiesMoves(): void {
     this.state = 'pending';
+
+    if (!this.checkIfEnoughCards()) {
+      alert('Колода закончилась, никто не победил!');
+      this.setupHands();
+      return;
+    }
 
     if (!this.enemies.length) {
       alert('Ход дилера');
@@ -81,6 +97,12 @@ export class GameService implements Game {
   }
 
   startDealerMoves(): void {
+    if (!this.checkIfEnoughCards()) {
+      alert('Колода закончилась, никто не победил!');
+      this.setupHands();
+      return;
+    }
+
     const gameInterval = setInterval(() => {
       if (!this.dealer.checkIfCanMove(this.player.score)) {
         clearInterval(gameInterval);
@@ -93,10 +115,14 @@ export class GameService implements Game {
     }, 1000);
   }
 
+  private checkIfEnoughCards(): boolean {
+    return this.deck.hasCards();
+  }
+
   private determineWinner(): Hand {
     const players: any = [
-      this.player,
       ...this.enemies,
+      this.player,
       this.dealer,
     ];
     let currentWinner: any = null;
@@ -121,6 +147,7 @@ export class GameService implements Game {
 
   private processWinner(): void {
     this.state = 'pending';
+    this.canRestart = true;
     const winner: Hand = this.determineWinner();
     this.addWin(winner);
   }

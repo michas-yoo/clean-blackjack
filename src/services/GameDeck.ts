@@ -38,6 +38,10 @@ export class GameDeck implements Deck {
     return theCard;
   }
 
+  hasCards(): boolean {
+    return this.cards.length > 0;
+  }
+
   private clearDeck(): void {
     this.cards = [];
   }

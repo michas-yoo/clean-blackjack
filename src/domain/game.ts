@@ -1,4 +1,3 @@
-export type Winner = 'player' | 'dealer';
 export type GameState = 'game' | 'pending';
 
 export interface Game {

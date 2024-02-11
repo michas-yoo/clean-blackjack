@@ -6,9 +6,12 @@ export class GameHand implements Hand {
   public deck: Deck;
   public cards: Card[] = [];
   public score: number = 0;
+  public wins: number = 0;
+  public name: string;
 
-  constructor(deck: Deck) {
+  constructor(deck: Deck, name: string) {
     this.deck = deck;
+    this.name = name;
   }
 
   dealCards(): void {

@@ -3,10 +3,9 @@ export type GameState = 'game' | 'pending';
 
 export interface Game {
   state: GameState;
-  playerWins: number;
-  dealerWins: number;
   setupHands(): void;
   playerMove(): void;
+  startEnemiesMoves(): void;
   startDealerMoves(): void;
 }
 

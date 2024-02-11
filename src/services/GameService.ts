@@ -1,20 +1,22 @@
 import { Deck } from '../domain/deck.ts';
-import { Game, GameState, MAX_SCORE, Winner } from '../domain/game.ts';
-import { Dealer, Player } from '../domain/player.ts';
+import { Hand } from '../domain/hand.ts';
+import { AI, Player } from '../domain/player.ts';
+import { Game, GameState, MAX_SCORE } from '../domain/game.ts';
 
 export class GameService implements Game {
   public state: GameState;
-  private player: Player;
-  private dealer: Dealer;
-  public playerWins: number = 0;
-  public dealerWins: number = 0;
+  private readonly player: Player;
+  private readonly dealer: AI;
+  private readonly enemies: AI[];
+
   private readonly deck: Deck;
 
-  constructor(deck: Deck, player: Player, dealer: Dealer) {
+  constructor(deck: Deck, player: Player, dealer: AI, enemies: AI[]) {
     this.deck = deck;
     this.state = 'game';
     this.player = player;
     this.dealer = dealer;
+    this.enemies = enemies;
 
     this.setupHands();
   }
@@ -27,6 +29,7 @@ export class GameService implements Game {
 
     this.player.dealCards();
     this.dealer.dealCards();
+    this.enemies.forEach((enemy) => enemy.dealCards());
   }
 
   playerMove(): void {
@@ -34,45 +37,96 @@ export class GameService implements Game {
 
     if (!this.player.checkIfCanMove()) {
       setTimeout(() => {
-        alert('Can\'t move!');
-        this.processWinner();
+        alert('Перебор!');
+
+        if (this.enemies.length) {
+          this.startEnemiesMoves();
+        } else {
+          this.startDealerMoves();
+        }
       }, 500);
       return;
     }
   }
 
-  startDealerMoves(): void {
+  startEnemiesMoves(): void {
     this.state = 'pending';
 
+    if (!this.enemies.length) {
+      alert('Ход дилера');
+      this.startDealerMoves();
+      return;
+    }
+
+    let currentEnemy: number = 0;
+
+    const enemyMovingInterval = setInterval(() => {
+      const enemy = this.enemies[currentEnemy];
+
+      if (!enemy) {
+        clearInterval(enemyMovingInterval);
+        alert('Все противники сделали ход.');
+        this.startDealerMoves();
+        return;
+      }
+
+      if (enemy.checkIfCanMove(this.player.score)) {
+        enemy.makeAMove();
+        return;
+      }
+
+      alert(`${enemy.name} больше не ходит`);
+      currentEnemy++;
+    }, 1000);
+  }
+
+  startDealerMoves(): void {
     const gameInterval = setInterval(() => {
       if (!this.dealer.checkIfCanMove(this.player.score)) {
         clearInterval(gameInterval);
-        alert('Dealer cant move!');
+        alert('Дилер больше не ходит!');
         this.processWinner();
-        return
+        return;
       }
 
       this.dealer.makeAMove();
-    }, 1000)
+    }, 1000);
   }
 
-  private determineWinner(playerScore: number, dealerScore: number): Winner {
-    if (playerScore > MAX_SCORE) return 'dealer';
-    if (dealerScore > MAX_SCORE) return 'player';
-    if (playerScore > dealerScore) return 'player';
+  private determineWinner(): Hand {
+    const players: any = [
+      this.player,
+      ...this.enemies,
+      this.dealer,
+    ];
+    let currentWinner: any = null;
 
-    // dealer wins on a draw
-    return 'dealer';
+    players.forEach((possibleWinner: Hand) => {
+      if (possibleWinner.score > MAX_SCORE) return;
+      if (
+        !currentWinner ||
+        currentWinner.score <= possibleWinner.score
+      ) {
+        currentWinner = possibleWinner;
+      }
+    });
+
+    if (!currentWinner) {
+      alert("Нет победителей, выиграл дилер");
+      return this.dealer;
+    }
+
+    return currentWinner;
   }
 
   private processWinner(): void {
     this.state = 'pending';
-    const winner: Winner = this.determineWinner(this.player.score, this.dealer.score);
+    const winner: Hand = this.determineWinner();
     this.addWin(winner);
   }
 
-  private addWin(winner: Winner): void {
-    this[`${winner}Wins`] += 1;
-    alert(`${winner} won!`);
+  private addWin(winner: Hand): void {
+    alert(`${winner.name} победил!`);
+    winner.wins++;
   }
 }

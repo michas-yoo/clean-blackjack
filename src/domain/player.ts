@@ -13,6 +13,6 @@ export interface Player extends Movable, Hand, HasCards {
   checkIfCanMove(): boolean;
 }
 
-export interface Dealer extends Movable, Hand, HasCards {
+export interface AI extends Movable, Hand, HasCards {
   checkIfCanMove(playersScore: number): boolean;
 }

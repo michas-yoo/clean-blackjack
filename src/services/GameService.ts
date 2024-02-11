@@ -120,14 +120,16 @@ export class GameService implements Game {
   }
 
   private determineWinner(): Hand {
-    const players: any = [
+    type PossibleWinner = Player | AI;
+
+    const players: PossibleWinner[] = [
       ...this.enemies,
       this.player,
       this.dealer,
     ];
     let currentWinner: any = null;
 
-    players.forEach((possibleWinner: Hand) => {
+    players.forEach((possibleWinner: PossibleWinner): void => {
       if (possibleWinner.score > MAX_SCORE) return;
       if (
         !currentWinner ||

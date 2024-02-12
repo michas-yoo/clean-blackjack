@@ -1,9 +1,9 @@
-import { AI } from '../domain/player.ts';
+import { Player } from '../domain/player.ts';
 import { GameHand } from './GameHand.ts';
 
 const MAX_SAFE_SCORE = 19;
 
-export class AIPlayer extends GameHand implements AI {
+export class AIPlayer extends GameHand implements Player {
   makeAMove(): void {
     this.addCard(this.deck.pickCard());
   }

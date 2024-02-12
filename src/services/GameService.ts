@@ -1,6 +1,5 @@
 import { Deck } from '../domain/deck.ts';
-import { Hand } from '../domain/hand.ts';
-import { AI, Player } from '../domain/player.ts';
+import { Player } from '../domain/player.ts';
 import { ModalService } from './ModalService.ts';
 import { Game, GameState, MAX_SCORE } from '../domain/game.ts';
 
@@ -8,11 +7,11 @@ export class GameService implements Game {
   public state: GameState;
   public canRestart: boolean;
   private readonly player: Player;
-  private readonly dealer: AI;
-  private readonly enemies: AI[];
+  private readonly dealer: Player;
+  private readonly enemies: Player[];
   private readonly deck: Deck;
 
-  constructor(deck: Deck, player: Player, dealer: AI, enemies: AI[]) {
+  constructor(deck: Deck, player: Player, dealer: Player, enemies: Player[]) {
     this.deck = deck;
     this.state = 'game';
     this.player = player;
@@ -119,17 +118,15 @@ export class GameService implements Game {
     return this.deck.hasCards();
   }
 
-  private determineWinner(): Hand {
-    type PossibleWinner = Player | AI;
-
-    const players: PossibleWinner[] = [
+  private determineWinner(): Player {
+    const players: Player[] = [
       ...this.enemies,
       this.player,
       this.dealer,
     ];
     let currentWinner: any = null;
 
-    players.forEach((possibleWinner: PossibleWinner): void => {
+    players.forEach((possibleWinner: Player): void => {
       if (possibleWinner.score > MAX_SCORE) return;
       if (
         !currentWinner ||
@@ -150,11 +147,11 @@ export class GameService implements Game {
   private processWinner(): void {
     this.state = 'pending';
     this.canRestart = true;
-    const winner: Hand = this.determineWinner();
+    const winner: Player = this.determineWinner();
     this.addWin(winner);
   }
 
-  private addWin(winner: Hand): void {
+  private addWin(winner: Player): void {
     ModalService.alert(`${winner.name} победил!`);
     winner.wins++;
   }

@@ -1,9 +1,9 @@
-import { AI } from '../domain/player.ts';
+import { Player } from '../domain/player.ts';
 import { GameHand } from './GameHand.ts';
 
 const SOFT_CAP = 17;
 
-export class GameDealer extends GameHand implements AI {
+export class GameDealer extends GameHand implements Player {
   makeAMove(): void {
     this.addCard(this.deck.pickCard());
   }

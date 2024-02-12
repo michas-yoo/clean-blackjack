@@ -1,18 +1,13 @@
 import { Hand } from './hand.ts';
 import { Deck } from './deck.ts';
 
-interface Movable {
+interface CanMove {
   makeAMove(): void;
+  checkIfCanMove(referenceScore?: number): boolean;
 }
 
-interface HasCards {
+export interface Player extends Hand, CanMove {
+  name: string;
+  wins: number;
   deck: Deck;
-}
-
-export interface Player extends Movable, Hand, HasCards {
-  checkIfCanMove(): boolean;
-}
-
-export interface AI extends Movable, Hand, HasCards {
-  checkIfCanMove(playersScore: number): boolean;
 }

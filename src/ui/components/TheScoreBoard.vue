@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { AI, Player } from '../../domain/player.ts';
+import { Player } from '../../domain/player.ts';
 
 type TheScoreBoardProps = {
   player: Player;
-  dealer: AI;
-  enemies: AI[];
+  dealer: Player;
+  enemies: Player[];
 };
 
 const props = defineProps<TheScoreBoardProps>();

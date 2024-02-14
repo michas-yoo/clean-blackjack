@@ -124,7 +124,7 @@ export class GameService implements Game {
       this.player,
       this.dealer,
     ];
-    let currentWinner: any = null;
+    let currentWinner: Player | null = null;
 
     players.forEach((possibleWinner: Player): void => {
       if (possibleWinner.score > MAX_SCORE) return;

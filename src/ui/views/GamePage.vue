@@ -4,17 +4,17 @@ import { GameDeck } from '../../services/GameDeck.ts';
 import { GameService } from '../../services/GameService.ts';
 import { MainPlayer } from '../../services/MainPlayer.ts';
 import { GameDealer } from '../../services/GameDealer.ts';
-import { AI } from '../../domain/player.ts';
 import { AIPlayer } from '../../services/AIPlayer.ts';
 import TheHand from '../components/TheHand.vue';
 import TheScoreBoard from '../components/TheScoreBoard.vue';
+import { Player } from '../../domain/player.ts';
 
 const aiPlayersAmount = prompt('Сколько будет соперников?', '0');
 
 const deck = ref(new GameDeck());
 const player = ref(new MainPlayer(deck.value, 'Игрок'));
 const dealer = ref(new GameDealer(deck.value, 'Дилер'));
-const enemies = ref<AI[]>([]);
+const enemies = ref<Player[]>([]);
 
 for (let i = 0; i < Number(aiPlayersAmount); i++) {
   enemies.value.push(new AIPlayer(deck.value, `ИИ #${i + 1}`));
